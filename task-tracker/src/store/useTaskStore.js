@@ -8,30 +8,67 @@ const useTaskStore = create(
       tasks: [],
 
       addTask: (task) => {
-        set((state) => ({
-          tasks: [...state.tasks, task],
-        }));
-      },
+  try {
+    if (!task.title || task.title.trim() === '') {
+      useMessageStore
+        .getState()
+        .setMessage('Task title cannot be empty', 'error');
+      return; // stop the operation
+    }
+
+    set((state) => ({
+      tasks: [...state.tasks, task],
+    }));
+
+    useMessageStore
+      .getState()
+      .setMessage('Task added successfully', 'success');
+  } catch (error) {
+    console.error('Error adding task:', error);
+    useMessageStore
+      .getState()
+      .setMessage('Error adding task', 'error');
+  }
+},
 
       removeTask: (id) => {
-        set((state) => ({
-          tasks: state.tasks.filter((task) => task.id !== id),
-        }));
-      },
+  try {
+    set((state) => ({
+      tasks: state.tasks.filter((task) => task.id !== id),
+    }));
+    useMessageStore
+      .getState()
+      .setMessage('Task removed successfully', 'success');
+  } catch (error) {
+    console.error('Error removing task:', error);
+    useMessageStore
+      .getState()
+      .setMessage('Error removing task', 'error');
+  }
+},
 
-      toggleTask: (id) =>
-        set((state) => {
-          const updatedTasks = state.tasks
-            .map((task) =>
-              task.id === id
-                ? { ...task, completed: !task.completed }
-                : task
-            )
-            // Sort: incomplete first, completed last
-            .sort((a, b) => a.completed - b.completed);
+      toggleTask: (id) => {
+  try {
+    set((state) => {
+      const updatedTasks = state.tasks
+        .map((task) =>
+          task.id === id ? { ...task, completed: !task.completed } : task
+        )
+        .sort((a, b) => a.completed - b.completed);
 
-          return { tasks: updatedTasks };
-        }),
+      return { tasks: updatedTasks };
+    });
+
+    useMessageStore
+      .getState()
+      .setMessage('Task updated successfully', 'success');
+  } catch (error) {
+    console.error('Error toggling task:', error);
+    useMessageStore
+      .getState()
+      .setMessage('Error updating task', 'error');
+  }
+},
 
       fetchTasks: async () => {
         try {

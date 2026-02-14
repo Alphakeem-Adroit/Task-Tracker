@@ -1,5 +1,5 @@
-import create from 'zustand';
-import useMessageStore from './messageStore';
+import { create } from 'zustand';
+import useMessageStore from './useMessageStore';
 
 const useTaskStore = create((set) => ({
   tasks: [],
@@ -9,13 +9,28 @@ const useTaskStore = create((set) => ({
   removeTask: (id) => {
     set((state) => ({ tasks: state.tasks.filter(task => task.id !== id) }));
   },
-  toggleTask: (id) => {
-    set((state) => ({
-      tasks: state.tasks.map(task =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    }));
-  },
+//   toggleTask: (id) => {
+//     set((state) => ({
+//       tasks: state.tasks.map(task =>
+//         task.id === id ? { ...task, completed: !task.completed } : task
+//       )
+//     }));
+//   },
+
+toggleTask: (id) =>
+  set((state) => {
+    const updatedTasks = state.tasks.map(task =>
+      task.id === id
+        ? { ...task, completed: !task.completed }
+        : task
+    );
+
+    // Sort: incomplete (false) first, completed (true) last
+    updatedTasks.sort((a, b) => a.completed - b.completed);
+
+    return { tasks: updatedTasks };
+  }),
+
   fetchTasks: async () => {
     try {
       const response = await fetch('https://jsonplaceholder.typicode.com/todos');
